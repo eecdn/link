@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流量卡管理 - 科幻风格后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0f1d 0%, #1a1e38 100%);
+            font-family: 'Exo 2', sans-serif;
+            color: #e0e0ff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px 20px;
+        }
+        
+        /* 标题样式 - 科幻发光效果 */
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 100px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: transparent;
+            background: linear-gradient(to right, #00d2ff, #5e9bff, #9370ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            position: relative;
+            text-shadow: 0 0 15px rgba(113, 128, 255, 0.5);
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(113, 128, 255, 0.5), 
+                             0 0 20px rgba(113, 128, 255, 0.3);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(113, 128, 255, 0.8), 
+                             0 0 30px rgba(113, 128, 255, 0.6),
+                             0 0 40px rgba(113, 128, 255, 0.4);
+            }
+        }
+        
+        /* 卡片容器布局 */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 60px;
+            width: 100%;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            width: 280px;
+            height: 350px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #1e223e 0%, #292e52 100%);
+            border: 1px solid rgba(64, 224, 208, 0.2);
+            transition: all 0.5s ease;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #292e52 0%, #1e223e 100%);
+            transform: rotateY(180deg);
+            border: 1px solid rgba(113, 128, 255, 0.3);
+            text-align: center;
+        }
+        
+        .card.flipped .card-front {
+            box-shadow: 0 5px 25px rgba(64, 224, 208, 0.4);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 2px solid rgba(64, 224, 208, 0.3);
+            transition: all 0.4s ease;
+        }
+        
+        .card.flipped .icon {
+            background: rgba(64, 224, 208, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(64, 224, 208, 0.4);
+        }
+        
+        .icon i {
+            font-size: 40px;
+            color: #40e0d0;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #40e0d0;
+            text-shadow: 0 0 10px rgba(64, 224, 208, 0.4);
+        }
+        
+        .card-description {
+            font-size: 15px;
+            text-align: center;
+            color: #a4b1cd;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #3a42e6, #5e72eb);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(58, 66, 230, 0.4);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #5e72eb, #3a42e6);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            left: 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(58, 66, 230, 0.6);
+        }
+        
+        /* 科幻背景元素 */
+        .sci-fi-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .grid-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(transparent 24px, rgba(64, 224, 208, 0.05) 25px), 
+                              linear-gradient(90deg, transparent 24px, rgba(64, 224, 208, 0.05) 25px);
+            background-size: 25px 25px;
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(113, 128, 255, 0.4);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(64, 224, 208, 0.5);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+                margin-bottom: 60px;
+            }
+            
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+                margin-bottom: 50px;
+            }
+            
+            .card {
+                width: 260px;
+                height: 320px;
+            }
+            
+            .card-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 科幻背景元素 -->
+    <div class="sci-fi-bg">
+        <div class="grid-line"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+    
+    <div class="container">
+        <h1 class="title">流量卡管理</h1>
+        
+        <div class="card-container">
+            <!-- 卡片1：商城后台 -->
+            <div class="card" data-url="https://www.lhscwh.com/home/login">
+                <div class="card-front">
+                    <div class="icon">
+                        <i>🛍️</i>
+                    </div>
+                    <h2 class="card-title">商城后台</h2>
+                    <p class="card-description">购卡和设置套餐金额等</p>
+                    <p class="card-description">点击卡片查看详情</p>
+                </div>
+                <div class="card-back">
+                    <h2 class="card-title">商城后台</h2>
+                    <p class="card-description">购卡和设置套餐金额等。</p>
+                    <a href="https://www.lhscwh.com/home/login" target="_blank" class="btn">立即进入</a>
+                </div>
+            </div>
+            
+            <!-- 卡片2：后台管理 -->
+            <div class="card" data-url="https://www.lhscwh.com/admin/login/index.html">
+                <div class="card-front">
+                    <div class="icon">
+                        <i>⚙️</i>
+                    </div>
+                    <h2 class="card-title">后台管理</h2>
+                    <p class="card-description">开关机以及设置停用等</p>
+                    <p class="card-description">点击卡片查看详情</p>
+                </div>
+                <div class="card-back">
+                    <h2 class="card-title">后台管理</h2>
+                    <p class="card-description">管理所有系统设置、权限配置和数据监控，确保系统安全高效运行。</p>
+                    <a href="https://www.lhscwh.com/admin/login/index.html" target="_blank" class="btn">立即进入</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建动态背景粒子
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机尺寸
+                const size = Math.random() * 4 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // 随机位置
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                
+                // 随机动画
+                const animationDuration = Math.random() * 20 + 10;
+                particle.style.animation = `float ${animationDuration}s linear infinite`;
+                
+                // 生成随机的偏移量
+                const keyframes = `
+                @keyframes particleAnim_${i} {
+                    0% {
+                        transform: translate(0, 0);
+                        opacity: 0;
+                    }
+                    10% {
+                        opacity: 1;
+                    }
+                    90% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(${Math.random() * 400 - 200}px, ${Math.random() * 400 - 200}px);
+                        opacity: 0;
+                    }
+                }
+                `;
+                
+                // 添加到页面
+                const styleSheet = document.createElement('style');
+                styleSheet.textContent = keyframes;
+                document.head.appendChild(styleSheet);
+                
+                // 应用动画
+                particle.style.animation = `particleAnim_${i} ${animationDuration}s linear infinite`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // 卡片点击翻转效果
+        function setupCardClick() {
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                // 点击卡片实现翻转
+                card.addEventListener('click', function() {
+                    // 如果卡片未翻转，才执行翻转
+                    if(!this.classList.contains('flipped')) {
+                        this.classList.add('flipped');
+                    }
+                });
+                
+                // 点击卡片外部区域翻转回去
+                document.addEventListener('click', function(event) {
+                    // 点击的不是卡片或卡片的子元素
+                    if(!card.contains(event.target)) {
+                        card.classList.remove('flipped');
+                    }
+                });
+            });
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            setupCardClick();
+        });
+    </script>
+</body>
+</html>
